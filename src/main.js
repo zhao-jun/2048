@@ -4,34 +4,117 @@
 var arr=[],
     hasConflicted=[],
     score=0,
-    onOff=false;
+    //开关，控制移动事件，每次只有一个同时发生
+    onOff=false,
+    //移动端滑动
+    startx = 0,
+    starty = 0,
+    endx = 0,
+    endy = 0,
+    //游戏状态保存
+    // state = localStorage.getItem('state',state) || [];
+
+
+//自适应计算
+documentWidth = window.screen.availWidth;
+gridContainerWidth = 0.92 * documentWidth;
+cellSideLength = 0.18 * documentWidth;
+cellSpace = 0.04*documentWidth;
 
 //开始新游戏
+prepareForMobile();
 newgame();
+$('.newgamebutton').click(function () {
+    //游戏状态删除
+    for(var i = 0;i < 4;i++){
+        for(var j = 0;j < 4;j++){
+            localStorage.removeItem('state'+ i + j)
+        }
+    }
+    return newgame();
+});
+
+// $('.newgamebutton').click(newgame);
 
 function newgame() {
+    //最高分设置
+    changeScore();
     //初始化
     init();
+
+    // if (localStorage.getItem('onOff') == 'on'){
+    //     return;
+    // }
+    if(localStorage.getItem('state33')){
+        return;
+    }
     //生成一个随机数
     generateOneNumber();
     generateOneNumber();
 
 }
+function changeScore() {
+    var num = localStorage.getItem('score') || 0;
+    $('#best').text( num );
+
+    if( num < score){
+        localStorage.setItem('score',score);
+        $('#best').text( score );
+    }
+}
+
+function prepareForMobile(){
+    //判断屏幕大小
+    if( documentWidth > 500 ){
+        gridContainerWidth = 500;
+        cellSpace = 20;
+        cellSideLength = 100;
+    }
+    //也可用媒体查询
+    if( documentWidth < 500 ) {
+        $('h1').css('font-size',0.15 * documentWidth + 'px');
+        $('.record').css('font-size','20px')
+    }
+    $('header').css('width',gridContainerWidth);
+    $('.grid-container').css('width',gridContainerWidth - 2*cellSpace);
+    $('.grid-container').css('height',gridContainerWidth - 2*cellSpace);
+    $('.grid-container').css('padding', cellSpace);
+    $('.grid-container').css('border-radius',0.02*gridContainerWidth);
+
+    $('.grid-cell').css('width',cellSideLength);
+    $('.grid-cell').css('height',cellSideLength);
+    $('.grid-cell').css('border-radius',0.02*cellSideLength);
+}
 
 function init() {
     //初始化二维数组
-    for (var i = 0;i < 4;i++){
+    for (var i = 0; i < 4; i++) {
         arr[i] = [];
         hasConflicted[i] = [];
-        for(var j = 0;j < 4;j++){
-            arr[i][j]=0;
+        for (var j = 0; j < 4; j++) {
+            arr[i][j] = 0;
             hasConflicted[i][j] = false;
         }
     }
+    score = 0;
+    //判断是否以前玩过
+    if (localStorage.getItem('state33')) {
+        score = localStorage.getItem('localScore') || 0;
+        score = parseInt(score);
+        for(var i = 0;i < 4;i++){
+            for(var j = 0;j < 4;j++){
+                arr[i][j] = parseInt(localStorage.getItem('state'+i+j));
+            }
+        }
+    }
+
     updateNumberCell();
+    $('#score').text( score );
 }
 
 function updateNumberCell() {
+
+
     //移除
     $('.number-cell').remove();
     for(var i = 0;i< 4;i++){
@@ -49,18 +132,35 @@ function updateNumberCell() {
                 theNumberCell.css('background-color',getNumberBackgroundColor( arr[i][j] ) );
                 theNumberCell.css('color',getNumberColor( arr[i][j] ) );
                 theNumberCell.text( arr[i][j] );
+                numberSize(theNumberCell,arr[i][j]);
             }
+
             hasConflicted[i][j] = false;
         }
     }
+    //统一赋值
+    $('.number-cell').css({'width':cellSideLength,'height':cellSideLength,'line-height':cellSideLength+'px'});
+
 }
+
+//判断数值绝对字体大小
+function numberSize(theNumberCell,number) {
+    if(number < 100) {
+        theNumberCell.css('font-size',0.6*cellSideLength+'px');
+    } else if ( number < 1000 ){
+        theNumberCell.css('font-size',0.5*cellSideLength+'px');
+    } else  {
+        theNumberCell.css('font-size',0.4*cellSideLength+'px');
+    }
+}
+
 //位置确定
 function getPosTop( i , j ){
-    return 20 + i*120;
+    return cellSpace + i*( cellSpace + cellSideLength );
 }
 
 function getPosLeft( i , j ){
-    return 20 + j*120;
+    return cellSpace + j*( cellSpace + cellSideLength );
 }
 //生成颜色
 function getNumberBackgroundColor( number ){
@@ -79,7 +179,7 @@ function getNumberBackgroundColor( number ){
         case 4096:return "#a6c";break;
         case 8192:return "#93c";break;
     }
-    return "black";
+    return "#000";
 }
 //初始颜色，不大于4
 function getNumberColor( number ){
@@ -98,6 +198,21 @@ function generateOneNumber() {
     var randX = parseInt (Math.random() * 4);
     var randY = parseInt (Math.random() * 4);
 
+
+/*    //算法优化
+    var count=0;
+    var temporary=[];
+    for(var i=0;i<4;i++) {
+        for (var j = 0; j < 4; j++) {
+            if (arr[i][j] == 0) {
+                temporary[count] = i * 4 + j;
+                count++;
+            }
+        }
+    }
+    var pos= parseInt( Math.floor( Math.random()  * count ) );
+    randx=Math.floor(temporary[pos]/4);
+    randy=Math.floor(temporary[pos]%4);*/
     while (true) {
         //保证随机位置为空
         if (arr[randX][randY] == 0) {
@@ -113,6 +228,7 @@ function generateOneNumber() {
     arr[randX][randY] = randNumber;
 
     showNumberWithAnimation( randX , randY , randNumber );
+    saveState();
 }
 
 function showNumberWithAnimation( i , j , randNumber ){
@@ -122,10 +238,11 @@ function showNumberWithAnimation( i , j , randNumber ){
     numberCell.css('background-color',getNumberBackgroundColor( randNumber ) );
     numberCell.css('color',getNumberColor( randNumber ) );
     numberCell.text( randNumber );
+    numberSize(numberCell,randNumber);
 
     numberCell.animate({
-        width:"100px",
-        height:"100px"
+        width:cellSideLength,
+        height:cellSideLength
     },50);
 }
 
@@ -140,14 +257,16 @@ function nospace( arr ){
     return true;
 }
 
-//事件监听
+//PC事件监听
 $(document).keydown( function (e) {
-    //增加判断，一次只能执行一个方向
-    if(onOff) return;
+
 
     switch(e.keyCode) {
         //左
         case 37:
+            e.preventDefault();
+            //增加判断，一次只能执行一个方向
+            if(onOff) return;
             if (moveLeft()) {
                 onOff = true;
                 setTimeout("generateOneNumber()",210);
@@ -156,6 +275,9 @@ $(document).keydown( function (e) {
             break;
         //上
         case 38:
+            e.preventDefault();
+            //增加判断，一次只能执行一个方向
+            if(onOff) return;
             if( moveUp() ){
                 onOff = true;
                 setTimeout("generateOneNumber()",210);
@@ -164,6 +286,9 @@ $(document).keydown( function (e) {
             break;
         //右
         case 39:
+            e.preventDefault();
+            //增加判断，一次只能执行一个方向
+            if(onOff) return;
             if( moveRight() ){
                 onOff = true;
                 setTimeout("generateOneNumber()",210);
@@ -172,6 +297,9 @@ $(document).keydown( function (e) {
             break;
         //下
         case 40:
+            e.preventDefault();
+            //增加判断，一次只能执行一个方向
+            if(onOff) return;
             if( moveDown() ){
                 onOff = true;
                 setTimeout("generateOneNumber()",210);
@@ -182,6 +310,73 @@ $(document).keydown( function (e) {
             break;
     }
 });
+
+//移动端事件监听
+document.addEventListener('touchstart',function(event){
+    startx = event.touches[0].pageX;
+    starty = event.touches[0].pageY;
+});
+//阻止手机上后退
+document.addEventListener('touchmove',function(event){
+    event.preventDefault();
+});
+
+document.addEventListener('touchend',function(event){
+    endx = event.changedTouches[0].pageX;
+    endy = event.changedTouches[0].pageY;
+
+    var deltax = endx - startx;
+    var deltay = endy - starty;
+
+    //判断滑动距离是否过短
+    if( Math.abs( deltax ) < 0.1*documentWidth && Math.abs( deltay ) < 0.1*documentWidth ){
+        return;
+    }
+    //XY方向哪个长往哪移动
+    if( Math.abs( deltax ) >= Math.abs( deltay ) ){
+
+        if( deltax > 0 ){
+            //move right
+            if( moveRight() ){
+                setTimeout("generateOneNumber()",210);
+                setTimeout("isgameover()",300);
+            }
+        }
+        else{
+            //move left
+            if( moveLeft() ){
+                setTimeout("generateOneNumber()",210);
+                setTimeout("isgameover()",300);
+            }
+        }
+    }
+    else{
+        if( deltay > 0 ){
+            //move down
+            if( moveDown() ){
+                setTimeout("generateOneNumber()",210);
+                setTimeout("isgameover()",300);
+            }
+        }
+        else{
+            //move up
+            if( moveUp() ){
+                setTimeout("generateOneNumber()",210);
+                setTimeout("isgameover()",300);
+            }
+        }
+    }
+});
+
+//游戏状态存储
+function saveState() {
+    for(var i = 0;i < 4;i++){
+        for(var j = 0;j < 4;j++){
+            localStorage.setItem('state'+ i + j, arr[i][j])
+        }
+    }
+    localStorage.setItem('localScore',score)
+}
 
 function isgameover() {
     if( nospace( arr ) && nomove( arr ) ){
