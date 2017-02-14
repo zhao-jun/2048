@@ -1,3 +1,6 @@
+// import {canMoveLeft,canMoveRight,canMoveUp,canMoveDown,noBlockHorizontal,noBlockVertical,nomove} from './determine';
+
+
 
 //point:每次通过改变数组重新生成div
 //利用二维数组来存储数据
@@ -10,21 +13,21 @@ var arr=[],
     startx = 0,
     starty = 0,
     endx = 0,
-    endy = 0,
-    //游戏状态保存
-    // state = localStorage.getItem('state',state) || [];
+    endy = 0;
+
 
 
 //自适应计算
-documentWidth = window.screen.availWidth;
-gridContainerWidth = 0.92 * documentWidth;
-cellSideLength = 0.18 * documentWidth;
-cellSpace = 0.04*documentWidth;
+var documentWidth = window.screen.availWidth;
+var gridContainerWidth = 0.92 * documentWidth;
+var cellSideLength = 0.18 * documentWidth;
+var cellSpace = 0.04*documentWidth;
 
 //开始新游戏
 prepareForMobile();
 newgame();
 $('.newgamebutton').click(function () {
+
     //游戏状态删除
     for(var i = 0;i < 4;i++){
         for(var j = 0;j < 4;j++){
@@ -34,9 +37,23 @@ $('.newgamebutton').click(function () {
     return newgame();
 });
 
+//新游戏
+$('.end').click(function () {
+
+    //游戏状态删除
+    for(var i = 0;i < 4;i++){
+        for(var j = 0;j < 4;j++){
+            localStorage.removeItem('state'+ i + j)
+        }
+    }
+    $('.end').hide();
+    return newgame();
+});
+
 // $('.newgamebutton').click(newgame);
 
 function newgame() {
+
     //最高分设置
     changeScore();
     //初始化
@@ -54,6 +71,7 @@ function newgame() {
 
 }
 function changeScore() {
+
     var num = localStorage.getItem('score') || 0;
     $('#best').text( num );
 
@@ -87,6 +105,7 @@ function prepareForMobile(){
 }
 
 function init() {
+
     //初始化二维数组
     for (var i = 0; i < 4; i++) {
         arr[i] = [];
@@ -113,8 +132,6 @@ function init() {
 }
 
 function updateNumberCell() {
-
-
     //移除
     $('.number-cell').remove();
     for(var i = 0;i< 4;i++){
@@ -219,8 +236,8 @@ function generateOneNumber() {
             break;
         }
         //不为空则重新生成
-        var randX = parseInt (Math.random() * 4);
-        var randY = parseInt (Math.random() * 4);
+        randX = parseInt (Math.random() * 4);
+        randY = parseInt (Math.random() * 4);
     }
 
     //随机生成数字 2 4
@@ -258,7 +275,7 @@ function nospace( arr ){
 }
 
 //PC事件监听
-$(document).keydown( function (e) {
+$(document).keydown( function(e) {
 
 
     switch(e.keyCode) {
@@ -378,18 +395,8 @@ function saveState() {
     localStorage.setItem('localScore',score)
 }
 
-function isgameover() {
-    if( nospace( arr ) && nomove( arr ) ){
-        gameover();
-    }
-    onOff = false;
-}
-//有待优化
-function gameover(){
-    alert('gameover!');
-}
 
-function moveLeft(){
+function moveLeft() {
     //判断能否向左移动，只要最左侧一列有空或最左边两个数字相同
     if( !canMoveLeft( arr ) ) {
         return false;
@@ -544,8 +551,16 @@ function moveDown(){
     return true;
 }
 
-
-
+function isgameover() {
+    if( nospace( arr ) && nomove( arr ) ){
+        gameover();
+    }
+    onOff = false;
+}
+//有待提高
+function gameover(){
+    $('.end').show();
+}
 
 function showMoveAnimation( fromx , fromy , tox, toy ){
 
@@ -557,7 +572,7 @@ function showMoveAnimation( fromx , fromy , tox, toy ){
 }
 
 function updateScore( score ){
-    setTimeout(function () {
+    setTimeout(function() {
 
     },300);
     $('#score').text( score );
