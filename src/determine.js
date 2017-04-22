@@ -1,5 +1,6 @@
+"use strict";
 //判断能否向左移动，有空格或者相邻数字相同
-function canMoveLeft(arr) {
+export function canMoveLeft(arr) {
     for( var i = 0 ; i < 4 ; i ++ ) {
         for (var j = 1; j < 4; j++) {
             if (arr[i][j] != 0) {
@@ -12,7 +13,7 @@ function canMoveLeft(arr) {
     return false;
 }
 
-function canMoveRight( arr ){
+export function canMoveRight( arr ){
 
     for( var i = 0 ; i < 4 ; i ++ ) {
         for (var j = 2; j >= 0; j--) {
@@ -26,7 +27,7 @@ function canMoveRight( arr ){
     return false;
 }
 
-function canMoveUp( arr ){
+export function canMoveUp( arr ){
 
     for( var j = 0 ; j < 4 ; j ++ ) {
         for (var i = 1; i < 4; i++) {
@@ -40,7 +41,7 @@ function canMoveUp( arr ){
     return false;
 }
 
-function canMoveDown( arr ) {
+export function canMoveDown( arr ) {
 
     for (var j = 0; j < 4; j++) {
         for (var i = 2; i >= 0; i--) {
@@ -54,7 +55,7 @@ function canMoveDown( arr ) {
     return false;
 }
 
-function noBlockHorizontal( row , col1 , col2 , arr ){
+export function noBlockHorizontal( row , col1 , col2 , arr ){
     for( var i = col1 + 1 ; i < col2 ; i ++ ) {
         if (arr[row][i] != 0) {
             return false;
@@ -63,7 +64,7 @@ function noBlockHorizontal( row , col1 , col2 , arr ){
     return true;
 }
 
-function noBlockVertical( col , row1 , row2 , arr ){
+export function noBlockVertical( col , row1 , row2 , arr ){
     for( var i = row1 + 1 ; i < row2 ; i ++ ) {
         if (arr[i][col] != 0) {
             return false;
@@ -72,7 +73,7 @@ function noBlockVertical( col , row1 , row2 , arr ){
     return true;
 }
 
-function nomove( arr ){
+export function nomove( arr ){
     if( canMoveLeft( arr ) ||
         canMoveRight( arr ) ||
         canMoveUp( arr ) ||

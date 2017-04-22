@@ -165,4 +165,5 @@ header .newgamebutton:hover {
     border-radius:10px;
     color: #fff;
     font-weight: bold;
+    cursor: pointer;
 }
